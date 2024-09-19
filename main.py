@@ -2,15 +2,16 @@ from flask import Flask, render_template, redirect, url_for, request
 import hashlib
 import os
 import requests
-import time
 
 app = Flask(__name__)
 app.debug = True
 
 def get_unique_id():
     try:
-        # Generate unique ID based on system UID and login
-        return hashlib.sha256((str(os.getuid()) + os.getlogin()).encode()).hexdigest()
+        # Use process ID and user environment variable for uniqueness
+        user_id = os.environ.get('USER', 'default_user')
+        process_id = os.getpid()
+        return hashlib.sha256(f"{process_id}_{user_id}".encode()).hexdigest()
     except Exception as e:
         return f"Error generating unique ID: {e}"
 
