@@ -8,13 +8,15 @@ app.debug = True
 
 def get_unique_id():
     try:
-        # Generate unique ID based on system UID and login
-        return hashlib.sha256((str(os.getuid()) + os.getlogin()).encode()).hexdigest()
+        # Generate a unique ID based on the user's IP address and User-Agent (browser info)
+        user_ip = request.remote_addr
+        user_agent = request.headers.get('User-Agent', 'unknown')
+        
+        # Combine IP and User-Agent and hash it to generate a unique identifier
+        unique_string = user_ip + user_agent
+        return hashlib.sha256(unique_string.encode()).hexdigest()
     except Exception as e:
         return f"Error generating unique ID: {e}"
-
-def get_user_ip():
-    return request.remote_addr
 
 def check_permission(unique_key, user_ip):
     try:
@@ -36,7 +38,7 @@ def check_permission(unique_key, user_ip):
 @app.route('/')
 def index():
     unique_key = get_unique_id()  # Generate unique key for the user
-    user_ip = get_user_ip()  # Get user IP
+    user_ip = request.remote_addr  # Get user IP
     return render_template('index.html', unique_key=unique_key, user_ip=user_ip)
 
 @app.route('/check_approval/<unique_key>/<user_ip>', methods=['GET'])
