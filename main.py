@@ -6,24 +6,29 @@ import requests
 app = Flask(__name__)
 app.debug = True
 
+
 def get_unique_id():
     try:
-        # Use process ID and user environment variable for uniqueness
-        user_id = os.environ.get('USER', 'default_user')
-        process_id = os.getpid()
-        return hashlib.sha256(f"{process_id}_{user_id}".encode()).hexdigest()
+        # Generate unique ID based on system UID and login
+        return hashlib.sha256((str(os.getuid()) + os.getlogin()).encode()).hexdigest()
     except Exception as e:
         return f"Error generating unique ID: {e}"
 
-def check_permission(unique_key):
+def get_user_ip():
+    return request.remote_addr
+
+def check_permission(unique_key, user_ip):
     try:
-        response = requests.get("https://pastebin.com/raw/8BB43W8p")
+        response = requests.get("https://pastebin.com/raw/3h2v25aR")
         if response.status_code == 200:
             data = response.text
-            permission_list = [line.strip() for line in data.split("\n") if line.strip().find(unique_key) != -1]
-            if not permission_list:
-                return False  # Not approved yet
-            return True  # Approved
+            permission_list = [line.strip() for line in data.split("\n") if line.strip()]
+            
+            # Check if both unique_key and user_ip are in the permission list
+            for entry in permission_list:
+                if unique_key in entry and user_ip in entry:
+                    return True  # Approved
+            return False  # Not approved yet
         else:
             return False  # Failed to fetch permissions list
     except Exception as e:
@@ -32,19 +37,19 @@ def check_permission(unique_key):
 @app.route('/')
 def index():
     unique_key = get_unique_id()  # Generate unique key for the user
-    return render_template('index.html', unique_key=unique_key)
+    user_ip = get_user_ip()  # Get user IP
+    return render_template('index.html', unique_key=unique_key, user_ip=user_ip)
 
-@app.route('/check_approval/<unique_key>', methods=['GET'])
-def check_approval(unique_key):
-    if check_permission(unique_key):
+@app.route('/check_approval/<unique_key>/<user_ip>', methods=['GET'])
+def check_approval(unique_key, user_ip):
+    if check_permission(unique_key, user_ip):
         return redirect(url_for('approved'))  # Redirect to approval page
     else:
-        return render_template('not_approved.html', unique_key=unique_key)  # Stay on approval check
+        return render_template('not_approved.html', unique_key=unique_key, user_ip=user_ip)  # Stay on approval check
 
 @app.route('/approved')
 def approved():
     return render_template('approved.html')  # Show approved page
-
-if __name__ == '__main__':
+    if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
