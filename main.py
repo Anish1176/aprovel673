@@ -4,8 +4,6 @@ import os
 import requests
 
 app = Flask(__name__)
-app.debug = True
-
 
 def get_unique_id():
     try:
@@ -50,6 +48,6 @@ def check_approval(unique_key, user_ip):
 @app.route('/approved')
 def approved():
     return render_template('approved.html')  # Show approved page
-    if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3001)
