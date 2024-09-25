@@ -1,57 +1,177 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, request, redirect, url_for, send_from_directory
 import hashlib
 import os
 import requests
+import uuid  # <-- Make sure to import uuid
 
 app = Flask(__name__)
-app.debug = True
 
-def get_unique_id():
-    try:
-        # Generate a unique ID based on the user's IP address and User-Agent (browser info)
-        user_ip = request.remote_addr
-        user_agent = request.headers.get('User-Agent', 'unknown')
-        
-        # Combine IP and User-Agent and hash it to generate a unique identifier
-        unique_string = user_ip + user_agent
-        return hashlib.sha256(unique_string.encode()).hexdigest()
-    except Exception as e:
-        return f"Error generating unique ID: {e}"
-
-def check_permission(unique_key, user_ip):
-    try:
-        response = requests.get("https://pastebin.com/raw/3h2v25aR")
-        if response.status_code == 200:
-            data = response.text
-            permission_list = [line.strip() for line in data.split("\n") if line.strip()]
-            
-            # Check if both unique_key and user_ip are in the permission list
-            for entry in permission_list:
-                if unique_key in entry and user_ip in entry:
-                    return True  # Approved
-            return False  # Not approved yet
-        else:
-            return False  # Failed to fetch permissions list
-    except Exception as e:
-        return f"Error checking permission: {e}"
+# Route to serve the image
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('/mnt/data', filename)
 
 @app.route('/')
 def index():
-    unique_key = get_unique_id()  # Generate unique key for the user
-    user_ip = request.remote_addr  # Get user IP
-    return render_template('index.html', unique_key=unique_key, user_ip=user_ip)
+    return '''
+    <html>
+    <head>
+        <style>
+            body {
+                background-image: url('https://i.ibb.co/f0JCQMM/Screenshot-20240922-100537-Gallery.jpg');
+                background-size: cover;
+                text-align: center;
+                color: yellow;
+                font-family: Arial, sans-serif;
+            }
+            h1 {
+                font-size: 4em;
+                margin-top: 100px;
+            }
+            a {
+                display: inline-block;
+                margin-top: 20px;
+                font-size: 2em;
+                color: green;
+                text-decoration: none;
+                background: black;
+                padding: 10px 20px;
+                border-radius: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Welcome!</h1>
+        <a href="/approval-request">Request Approval</a>
+    </body>
+    </html>
+    '''
 
-@app.route('/check_approval/<unique_key>/<user_ip>', methods=['GET'])
-def check_approval(unique_key, user_ip):
-    if check_permission(unique_key, user_ip):
-        return redirect(url_for('approved'))  # Redirect to approval page
+@app.route('/approval-request')
+def approval_request():
+    unique_key = hashlib.sha256(str(uuid.uuid4()).encode()).hexdigest()
+    return '''
+    <html>
+    <head>
+        <style>
+            body {{
+                background-image: url('https://i.ibb.co/f0JCQMM/Screenshot-20240922-100537-Gallery.jpg');
+                background-size: cover;
+                text-align: center;
+                color: yellow;
+                font-family: Arial, sans-serif;
+            }}
+            h1 {{
+                font-size: 3em;
+                margin-top: 100px;
+            }}
+            p {{
+                font-size: 1.5em;
+            }}
+            input[type=submit] {{
+                font-size: 1.5em;
+                padding: 10px 20px;
+                background-color: black;
+                color: green;
+                border: none;
+                border-radius: 10px;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Approval Request</h1>
+        <p>Your unique key is: {}</p>
+        <form action="/check-permission" method="post">
+            <input type="hidden" name="unique_key" value="{}">
+            <input type="submit" value="Request Approval">
+        </form>
+
+        <a href="https://wa.me/+919354720853" style="font-size: 1.5em; padding: 10px 20px; background-color: black; color: green; border-radius: 10px; text-decoration: none;">Contact Owner</a>
+
+   </body>
+    </html>
+    '''.format(unique_key, unique_key)
+
+@app.route('/check-permission', methods=['POST'])
+def check_permission():
+    unique_key = request.form['unique_key']
+    response = requests.get("https://pastebin.com/raw/8BB43W8p")
+    approved_tokens = [token.strip() for token in response.text.splitlines() if token.strip()]
+    if unique_key in approved_tokens:
+        return redirect(url_for('approved', key=unique_key))
     else:
-        return render_template('not_approved.html', unique_key=unique_key, user_ip=user_ip)  # Stay on approval check
+        return redirect(url_for('not_approved', key=unique_key))
 
 @app.route('/approved')
 def approved():
-    return render_template('approved.html')  # Show approved page
+    key = request.args.get('key')
+    return '''
+    <html>
+    <head>
+        <style>
+            body {{
+                background-image: url('https://i.ibb.co/f0JCQMM/Screenshot-20240922-100537-Gallery.jpg');
+                background-size: cover;
+                text-align: center;
+                color: yellow;
+                font-family: Arial, sans-serif;
+            }}
+            h1 {{
+                font-size: 3em;
+                margin-top: 100px;
+            }}
+            p {{
+                font-size: 1.5em;
+            }}
+            a {{
+                font-size: 1.5em;
+                padding: 10px 20px;
+                background-color: black;
+                color: green;
+                border-radius: 10px;
+                text-decoration: none;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Approved!</h1>
+        <p>Your unique key is: {}</p>
+        <p>You have been approved. You can proceed with the script.</p>
+        <a href="https://done-hsuk.onrender.com" target="_blank">Request Approval</a>
+    </body>
+    </html>
+    '''.format(key)
+
+@app.route('/not-approved')
+def not_approved():
+    key = request.args.get('key')
+    return '''
+    <html>
+    <head>
+        <style>
+            body {{
+                background-image: url('https://i.ibb.co/f0JCQMM/Screenshot-20240922-100537-Gallery.jpg');
+                background-size: cover;
+                text-align: center;
+                color: yellow;
+                font-family: Arial, sans-serif;
+            }}
+            h1 {{
+                font-size: 3em;
+                margin-top: 100px;
+            }}
+            p {{
+                font-size: 1.5em;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Not Approved</h1>
+        <p>Your unique key is: {}</p>
+        <p>Sorry, you don't have permission to run this script.</p>
+    </body>
+    </html>
+    '''.format(key)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 3001))
-    app.run(host='0.0.0.0', port=port, debug=True)
+   app.run(host='0.0.0.0', port=10000, debug=True)
