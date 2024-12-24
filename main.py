@@ -367,14 +367,14 @@ h4{
     <br />
     <br />
           <div class="imager">
- <img src="https://i.ibb.co/DLGpSD5/20241001-153036.jpg" alt="Image" class="image">
+ <img src="https://i.ibb.co/FqBpX1G/images.jpg" alt="Image" class="image">
      <h1>➤ MULTY WEB TO WEB STICKER SEND TOOL FOR INBOX/GROUP CHAT CLICK ON CHECK BUTTON FOR USING THIS TOOL꧂</h1>
  <br />
  <button class="button-34" role="button" onclick="window.location.href='hosting.html'">CHECK  </button>
     <br />
     <br />
        <div class="imager">
- <img src="https://i.ibb.co/NNqfqDJ/20241001-013111.jpg" alt="Image" class="image">
+ <img src="https://i.ibb.co/FqBpX1G/images.jpg" alt="Image" class="image">
  <h1>➤ ALL WEB TO WEB TOOLS + ALL TERMUX TOOLS K LIYA UPER 3 DOT PY CLICK KARO꧂</h1>
  <br />
  <button class="button-34" role="button" onclick="window.location.href='hosting.html'">CHECK  </button>
