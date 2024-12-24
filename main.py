@@ -390,14 +390,14 @@ h4{
       </div>
       
       <div id="links" class="flex space-x-4">
-        <a href="https://www.facebook.com/hassanRajput038?mibextid=ZbWKwL" class="text-2xl hover:text-primary"><i class="fab fa-facebook"></i></a>
-        <a href="https://wa.me/+923417885339" class="text-2xl hover:text-primary"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://www.facebook.com/anishthedecent0183?mibextid=ZbWKwL" class="text-2xl hover:text-primary"><i class="fab fa-facebook"></i></a>
+        <a href="https://wa.me/+9779842484549" class="text-2xl hover:text-primary"><i class="fab fa-whatsapp"></i></a>
         <a href="https://github.com/HassanRajput0/" class="text-2xl hover:text-primary"><i class="fab fa-github"></i></a>
       </div>
       
       <div class="mt-4 md:mt-0 text-center">
-        <p>© 2024 Hassan Rajput. All Rights Reserved.</p>
-        <p>Made with ❤️ by <a href="">HASSN RAJPUT</a></p>
+        <p>© 2024 ANISH XD. All Rights Reserved.</p>
+        <p>Made with ❤️ by <a href="">ANISH XWD HERE</a></p>
       </div>
         <br />
     </div>
